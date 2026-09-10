@@ -1,0 +1,7 @@
+/vendor/
+.env
+.env.*
+*.pem
+.DS_Store
+Thumbs.db
+.vscode/
