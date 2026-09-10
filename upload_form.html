@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>画像アップロード</title>
+</head>
+<body>
+    <h2>画像アップロード</h2>
+    
+    <form id="uploadForm">
+        <!-- accept="image/jpeg, image/png, image/gif, image/webp" で選択を画像のみに限定 -->
+        <input type="file" id="imageInput" accept="image/jpeg, image/png, image/gif, image/webp" required>
+        <button type="submit">送信</button>
+    </form>
+
+    <p id="message"></p>
+    <img id="preview" width="300">
+
+    <script>
+    document.getElementById('uploadForm').onsubmit = async (e) => {
+        e.preventDefault();
+        
+        const fileInput = document.getElementById('imageInput');
+        if (!fileInput.files[0]) return;
+
+        const formData = new FormData();
+        formData.append('image', fileInput.files[0]);
+
+        document.getElementById('message').textContent = '送信中...';
+
+        try {
+            const res = await fetch('api.php', { method: 'POST', body: formData });
+            const data = await res.json();
+
+            document.getElementById('message').textContent = data.message;
+            if (data.url) {
+                document.getElementById('preview').src = data.url;
+            }
+        } catch (err) {
+            document.getElementById('message').textContent = 'エラーが発生しました。';
+        }
+    };
+    </script>
+</body>
+</html>
