@@ -1,5 +1,5 @@
 <?php
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8');
 require __DIR__ . '/vendor/autoload.php';
 
 use Aws\S3\S3Client;
@@ -39,13 +39,17 @@ try {
         'ContentType' => $mimeType,
     ]);
 
+    // 署名付きURLの生成
     $cmd = $s3->getCommand('GetObject', ['Bucket' => $config['bucket'], 'Key' => $s3Key]);
     $request = $s3->createPresignedRequest($cmd, '+15 minutes');
+    $presignedUrl = (string)$request->getUri();
 
+    // 3. JS側へ返す JSON レスポンス
     echo json_encode([
         'message' => 'アップロード成功！',
-        'url' => (string)$request->getUri()
+        'url'     => $presignedUrl
     ]);
+
 } catch (Exception $e) {
     echo json_encode(['message' => 'S3 エラー: ' . $e->getMessage()]);
 }

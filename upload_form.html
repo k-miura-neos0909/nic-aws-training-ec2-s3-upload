@@ -8,13 +8,18 @@
     <h2>画像アップロード</h2>
     
     <form id="uploadForm">
-        <!-- accept="image/jpeg, image/png, image/gif, image/webp" で選択を画像のみに限定 -->
         <input type="file" id="imageInput" accept="image/jpeg, image/png, image/gif, image/webp" required>
         <button type="submit">送信</button>
     </form>
 
     <p id="message"></p>
-    <img id="preview" width="300">
+    
+    <p id="urlContainer" style="display: none;">
+        <strong>S3 ファイル URL:</strong><br>
+        <a id="s3Url" href="" target="_blank"></a>
+    </p>
+
+    <img id="preview" width="300" style="display: none;">
 
     <script>
     document.getElementById('uploadForm').onsubmit = async (e) => {
@@ -27,14 +32,27 @@
         formData.append('image', fileInput.files[0]);
 
         document.getElementById('message').textContent = '送信中...';
+        
+        // 前回の表示をクリア
+        document.getElementById('urlContainer').style.display = 'none';
+        document.getElementById('preview').style.display = 'none';
 
         try {
             const res = await fetch('api.php', { method: 'POST', body: formData });
             const data = await res.json();
 
             document.getElementById('message').textContent = data.message;
+            
+            // ★ URLと画像プレビューを設定して表示 ★
             if (data.url) {
-                document.getElementById('preview').src = data.url;
+                const urlLink = document.getElementById('s3Url');
+                urlLink.href = data.url;
+                urlLink.textContent = data.url;
+                document.getElementById('urlContainer').style.display = 'block';
+
+                const previewImg = document.getElementById('preview');
+                previewImg.src = data.url;
+                previewImg.style.display = 'block';
             }
         } catch (err) {
             document.getElementById('message').textContent = 'エラーが発生しました。';
